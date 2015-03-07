@@ -14,7 +14,7 @@ suggested_subreddits = ['wallpapers', 'wallpaper', 'EarthPorn', 'BackgroundArt',
 
 default_settings = dict(
 	interval = 1,
-	minVote = 100,
+	minVote = 5,
 	subreddit = 'wallpapers',
 	search = '',
 	past = 'year',
@@ -25,6 +25,9 @@ class PreferencesDialog(wx.Dialog):
 	def __init__(self, app):
 		wx.Dialog.__init__(self, None, wx.ID_ANY, 'ReddWall', size=(400, 400))
 		self.app = app
+
+		self.Bind(wx.EVT_CLOSE, self.OnClose)
+
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
 		vbox.Add(wx.StaticText(self, label='Find wallpapers...', style=wx.ALIGN_CENTRE))
@@ -124,6 +127,10 @@ class PreferencesDialog(wx.Dialog):
 		self.app.settings['subreddit'] = self.subredditCombo.GetValue()
 		self.app.OnFilterUpdate()
 
+	def OnClose(self, evt):
+		self.app.SaveSettings()
+		self.Destroy()
+
 class ReddWallIcon(wx.TaskBarIcon):
 	ID_NEW_OPTION = wx.NewId()
 	ID_PREF_OPTION = wx.NewId()
@@ -149,6 +156,7 @@ class ReddWall(wx.App):
 	submissions = []
 	needSubmissionsUpdate = False
 	is_running = False
+	submission_ids = []
 
 	def __init__(self):
 		wx.App.__init__(self)
@@ -173,7 +181,7 @@ class ReddWall(wx.App):
 		return False
 
 	def SubmissionOkay(self, submission):
-		return submission.score > self.settings['minVote'] and (self.settings['allowNSFW'] or not submission.over_18)
+		return submission.score > self.settings['minVote'] and (self.settings['allowNSFW'] or not submission.over_18) and not submission.id in self.submission_ids
 
 	def GetSubmissions(self):
 		subreddit = r.get_subreddit(self.settings['subreddit'])
@@ -182,7 +190,7 @@ class ReddWall(wx.App):
 			'day': subreddit.get_top_from_day,
 			'week': subreddit.get_top_from_week,
 			'month': subreddit.get_top_from_month,
-			'year': subreddit.get_top_from_week,
+			'year': subreddit.get_top_from_year,
 			'all': subreddit.get_top_from_all
 		}
 		self.submissions = []
@@ -191,6 +199,7 @@ class ReddWall(wx.App):
 		for submission in request:
 			if self.SubmissionOkay(submission):
 				self.submissions.append(submission)
+				self.submission_ids.append(submission.id)
 				num_submissions -= 1
 		random.shuffle(self.submissions)
 		self.needSubmissionsUpdate = False
@@ -201,6 +210,8 @@ class ReddWall(wx.App):
 			try:
 				if len(self.submissions) == 0:
 					self.GetSubmissions()
+					if len(self.submissions) == 0:
+						return
 				submission = self.submissions.pop()
 				return imagefinder.get_image_request(submission.url)
 			except imagefinder.NoImageFound:
@@ -221,7 +232,7 @@ class ReddWall(wx.App):
 		pref.Show()
 
 	def StartTimer(self):
-		self.timer.Start(self.settings['interval'] * 60 * 60 * 1000)
+		self.timer.Start(self.settings['interval'] * 60 * 1000)
 
 	def OnUpdateInterval(self):
 		self.timer.Stop()
