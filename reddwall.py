@@ -6,6 +6,7 @@ import praw
 import random
 import wx
 import os.path
+import sys
 import json
 
 r = praw.Reddit(user_agent='mac:org.bauer.reddwall:v1.0.0 (by /u/mjbauer95)')
@@ -138,7 +139,11 @@ class ReddWallIcon(wx.TaskBarIcon):
 
 	def __init__(self, parent):
 		wx.TaskBarIcon.__init__(self)
-		self.SetIcon(wx.Icon(os.path.join(sys._MEIPASS, "alien.png"), wx.BITMAP_TYPE_PNG), "alien")
+		if getattr(sys, 'frozen', False):
+			ICON_PATH = os.path.join(sys._MEIPASS, "alien.png")
+		else:
+			ICON_PATH = "alien.png"
+		self.SetIcon(wx.Icon(ICON_PATH, wx.BITMAP_TYPE_PNG), "alien")
 		self.Bind(wx.EVT_MENU, parent.NextWallpaper, id=self.ID_NEW_OPTION)
 		self.Bind(wx.EVT_MENU, parent.CreatePrefWindow, id=self.ID_PREF_OPTION)
 		self.Bind(wx.EVT_MENU, parent.Quit, id=wx.ID_EXIT)
@@ -165,20 +170,20 @@ class ReddWall(wx.App):
 		self.LoadSettings()
 		self.icon = ReddWallIcon(self)
 
-                thread = threading.Thread(target=self.Init)
-                thread.setDaemon(True)
-                thread.start()
+		thread = threading.Thread(target=self.Init)
+		thread.setDaemon(True)
+		thread.start()
 
 		self.timer = wx.Timer(self, -1)
 		self.Bind(wx.EVT_TIMER, self.NextWallpaper, self.timer)
 		self.StartTimer()
 
-        	self.frame = wx.Frame(None, -1, style=wx.NO_BORDER|wx.FRAME_NO_TASKBAR)
+		self.frame = wx.Frame(None, -1, style=wx.NO_BORDER|wx.FRAME_NO_TASKBAR)
 		self.MainLoop()
 
 		self.SaveSettings()
 
-        def Init(self):
+	def Init(self):
 		self.GetSubmissions()
 		self.NextWallpaper()
 

@@ -112,7 +112,7 @@ def set_wallpaper(filename):
 	wallpaper_setter = get_wallpaper_setter()
 	if wallpaper_setter is not None:
 		try:
-                        wallpaper_setter.set_wallpaper(filename)
+			wallpaper_setter.set_wallpaper(filename)
 		except:
 			raise WallpaperSetterError(wallpaper_setter.environment)
 	else:
@@ -120,7 +120,7 @@ def set_wallpaper(filename):
 
 def set_wallpaper_request(request):
 	#i, path = tempfile.mkstemp(suffix=".jpg", dir=os.getcwd())
-        path = os.path.join(os.getcwd(), "background.jpg")
+	path = os.path.join(os.getcwd(), "background.jpg")
 	with open(path, 'wb') as fo:
 		for chunk in request.iter_content(4096):
 			fo.write(chunk)
