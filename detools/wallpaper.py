@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
-import os
 import sys
 import subprocess
+import tempfile
+import de
 
 class WallpaperSetter:
+	def __init__(self, environment):
+		self.environment = environment
 	def set_wallpaper(self, filename):
 		pass
 
@@ -90,60 +93,36 @@ wallpaper_setters["windowmaker"] = WindowMakerWallpaperSetter
 class MacWallpaperSetter(PopenWallpaperSetter):
 	def get_args(self, filename):
 		return 'osascript -e "tell application \\"Finder\\" to set desktop picture to POSIX file \\"%s\\""' % filename
-
 wallpaper_setters["mac"] = MacWallpaperSetter
 
-def get_desktop_environment():
-	if sys.platform in ["win32", "cygwin"]:
-		return "windows"
-	elif sys.platform == "darwin":
-		return "mac"
-	else: #Most likely either a POSIX system or something not much common
-		desktop_session = os.environ.get("DESKTOP_SESSION")
-		if desktop_session is not None: #easier to match if we doesn't have  to deal with caracter cases
-			desktop_session = desktop_session.lower()
-			if desktop_session in ["gnome","unity", "cinnamon", "mate", "xfce4", "lxde", "fluxbox", 
-								   "blackbox", "openbox", "icewm", "jwm", "afterstep","trinity", "kde"]:
-				return desktop_session
-			## Special cases ##
-			# Canonical sets $DESKTOP_SESSION to Lubuntu rather than LXDE if using LXDE.
-			# There is no guarantee that they will not do the same with the other desktop environments.
-			elif "xfce" in desktop_session or desktop_session.startswith("xubuntu"):
-				return "xfce4"
-			elif desktop_session.startswith("ubuntu"):
-				return "unity"       
-			elif desktop_session.startswith("lubuntu"):
-				return "lxde" 
-			elif desktop_session.startswith("kubuntu"): 
-				return "kde" 
-			elif desktop_session.startswith("razor"): # e.g. razorkwin
-				return "razor-qt"
-			elif desktop_session.startswith("wmaker"): # e.g. wmaker-common
-				return "windowmaker"
-		if os.environ.get('KDE_FULL_SESSION') == 'true':
-			return "kde"
-		elif os.environ.get('GNOME_DESKTOP_SESSION_ID'):
-			if not "deprecated" in os.environ.get('GNOME_DESKTOP_SESSION_ID'):
-				return "gnome2"
-		#From http://ubuntuforums.org/showthread.php?t=652320
-		elif self.is_running("xfce-mcs-manage"):
-			return "xfce4"
-		elif self.is_running("ksmserver"):
-			return "kde"
-	return "unknown"
-
 def get_wallpaper_setter():
-	environment = get_desktop_environment()
+	environment = de.get_desktop_environment()
 	if environment in wallpaper_setters:
-		return wallpaper_setters[environment]()
-	return None
+		return wallpaper_setters[environment](environment)
+	return WallpaperSetter(environment)
+
+class WallpaperSetterError(Exception):
+	def __init__(self, environment):
+		self.environment = environment
+	def __str__(self):
+		return "Cannot set wallpaper for %s" % self.environment
 
 def set_wallpaper(filename):
 	wallpaper_setter = get_wallpaper_setter()
 	if wallpaper_setter is not None:
-		wallpaper_setter.set_wallpaper(filename)
+		try:
+			wallpaper_setter.set_wallpaper(filename)
+		except:
+			raise WallpaperSetterError(wallpaper_setter.environment)
 	else:
-		raise Exception("Wallpaper could not be set because you're desktop is not recognized.")
+		raise WallpaperSetterError(wallpaper_setter.environment)
+
+def set_wallpaper_request(request):
+	i, path = tempfile.mkstemp()
+	with open(path, 'wb') as fo:
+		for chunk in request.iter_content(4096):
+			fo.write(chunk)
+	set_wallpaper(path)
 
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
