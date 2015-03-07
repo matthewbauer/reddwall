@@ -23,9 +23,14 @@ if sys.platform == 'darwin':
 		)),
 	)
 elif sys.platform == 'win32':
+	import py2exe
 	extra_options = dict(
 		setup_requires=['py2exe'],
-		app=[mainscript],
+		windows=[mainscript],
+                options=dict(py2exe=dict(
+                        bundle_files=1,
+                        compressed=True,
+                )),
 	)
 else:
 	extra_options = dict(

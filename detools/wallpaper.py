@@ -4,6 +4,7 @@ import sys
 import subprocess
 import tempfile
 import de
+import os
 
 class WallpaperSetter:
 	def __init__(self, environment):
@@ -30,9 +31,9 @@ except ImportError:
 try:
 	import ctypes
 	class WindowsWallpaperSetter(WallpaperSetter):
-		SPI_SETDESKWALLPAPER = 20
+                SPI_SETDESKWALLPAPER = 20
 		def set_wallpaper(self, filename):
-			ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, filename, 0)
+			ctypes.windll.user32.SystemParametersInfoA(self.SPI_SETDESKWALLPAPER, 0, filename, 0)
 	wallpaper_setters["windows"] = WindowsWallpaperSetter
 except ImportError:
 	pass
@@ -111,14 +112,15 @@ def set_wallpaper(filename):
 	wallpaper_setter = get_wallpaper_setter()
 	if wallpaper_setter is not None:
 		try:
-			wallpaper_setter.set_wallpaper(filename)
+                        wallpaper_setter.set_wallpaper(filename)
 		except:
 			raise WallpaperSetterError(wallpaper_setter.environment)
 	else:
 		raise WallpaperSetterError(wallpaper_setter.environment)
 
 def set_wallpaper_request(request):
-	i, path = tempfile.mkstemp()
+	#i, path = tempfile.mkstemp(suffix=".jpg", dir=os.getcwd())
+        path = os.path.join(os.getcwd(), "background.jpg")
 	with open(path, 'wb') as fo:
 		for chunk in request.iter_content(4096):
 			fo.write(chunk)

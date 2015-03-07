@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from detools import imagefinder
 from detools import wallpaper
+import threading
 import praw
 import random
 import wx
@@ -137,7 +138,7 @@ class ReddWallIcon(wx.TaskBarIcon):
 
 	def __init__(self, parent):
 		wx.TaskBarIcon.__init__(self)
-		self.SetIcon(wx.Icon("alien.png", wx.BITMAP_TYPE_PNG), "alien")
+		self.SetIcon(wx.Icon(os.path.join(sys._MEIPASS, "alien.png"), wx.BITMAP_TYPE_PNG), "alien")
 		self.Bind(wx.EVT_MENU, parent.NextWallpaper, id=self.ID_NEW_OPTION)
 		self.Bind(wx.EVT_MENU, parent.CreatePrefWindow, id=self.ID_PREF_OPTION)
 		self.Bind(wx.EVT_MENU, parent.Quit, id=wx.ID_EXIT)
@@ -162,20 +163,24 @@ class ReddWall(wx.App):
 		wx.App.__init__(self)
 
 		self.LoadSettings()
-
 		self.icon = ReddWallIcon(self)
 
-		self.GetSubmissions()
-
-		self.NextWallpaper()
+                thread = threading.Thread(target=self.Init)
+                thread.setDaemon(True)
+                thread.start()
 
 		self.timer = wx.Timer(self, -1)
 		self.Bind(wx.EVT_TIMER, self.NextWallpaper, self.timer)
 		self.StartTimer()
-		self.frame = wx.Frame(None, -1, style=wx.NO_BORDER|wx.FRAME_NO_TASKBAR)
+
+        	self.frame = wx.Frame(None, -1, style=wx.NO_BORDER|wx.FRAME_NO_TASKBAR)
 		self.MainLoop()
 
 		self.SaveSettings()
+
+        def Init(self):
+		self.GetSubmissions()
+		self.NextWallpaper()
 
 	def OSXIsGUIApplication(self):
 		return False
