@@ -232,7 +232,7 @@ class ReddWall(wx.App):
 		pref.Show()
 
 	def StartTimer(self):
-		self.timer.Start(self.settings['interval'] * 60 * 1000)
+		self.timer.Start(self.settings['interval'] * 60 * 60 * 1000)
 
 	def OnUpdateInterval(self):
 		self.timer.Stop()

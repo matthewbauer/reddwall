@@ -15,12 +15,10 @@ if sys.platform == 'darwin':
 		options=dict(py2app=dict(
 			plist={
 				'CFBundleName': 'ReddWall',
-				'CFBundleShortVersionString':'1.0.0', # must be in X.X.X format
+				'CFBundleShortVersionString':'1.0.0',
 				'CFBundleVersion': '1.0.0',
-				'CFBundleIdentifier': 'com.bauer.reddwall', #optional
-				'NSHumanReadableCopyright': '@ Matthew Bauer 2015', #optional
-				'CFBundleDevelopmentRegion': 'English', #optional - English is default
-#				'LSBackgroundOnly': 'true',
+				'CFBundleIdentifier': 'com.bauer.reddwall',
+				'NSHumanReadableCopyright': '@ Matthew Bauer 2015',
 			},
 		)),
 	)
