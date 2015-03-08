@@ -13,6 +13,7 @@ r = praw.Reddit(user_agent='mac:org.bauer.reddwall:v1.0.0 (by /u/mjbauer95)')
 
 pasts = ['hour', 'week', 'day', 'month', 'year', 'all']
 suggested_subreddits = ['wallpapers', 'wallpaper', 'EarthPorn', 'BackgroundArt', 'TripleScreenPlus', 'quotepaper', 'BigWallpapers', 'MultiWall', 'DesktopLego', 'VideoGameWallpapers']
+select = ['random', 'top']
 
 default_settings = dict(
 	interval = 1,
@@ -20,7 +21,8 @@ default_settings = dict(
 	subreddit = 'wallpapers',
 	search = '',
 	past = 'year',
-	allowNSFW = False
+	allowNSFW = False,
+	select = 'random'
 )
 
 class PreferencesDialog(wx.Dialog):
@@ -32,67 +34,78 @@ class PreferencesDialog(wx.Dialog):
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
-		vbox.Add(wx.StaticText(self, label='Find wallpapers...', style=wx.ALIGN_CENTRE))
+		vbox.Add(((-1, 10)))
 
-		vbox.Add((-1, 25))
+		selectBox = wx.BoxSizer(wx.HORIZONTAL)
+		selectBox.Add((10, -1))
+		selectBox.Add(wx.StaticText(self, label='Select '))
+		self.selectCombo = wx.ComboBox(self, value=self.app.settings['select'], choices=select, style=wx.CB_READONLY)
+		self.selectCombo.Bind(wx.EVT_TEXT, self.SetSelectCombo)
+		self.selectCombo.Bind(wx.EVT_COMBOBOX, self.SetSelectCombo)
+		selectBox.Add(self.selectCombo)
+		selectBox.Add(wx.StaticText(self, label=' wallpapers...'))
+		vbox.Add(selectBox)
+
+		vbox.Add((-1, 15))
 
 		subredditBox = wx.BoxSizer(wx.HORIZONTAL)
 		subredditBox.Add((25, -1))
-		subredditBox.Add(wx.StaticText(self, label='From the '))
+		subredditBox.Add(wx.StaticText(self, label='from the '))
 		self.subredditCombo = wx.ComboBox(self, value=self.app.settings['subreddit'], choices=suggested_subreddits)
 		self.subredditCombo.Bind(wx.EVT_TEXT, self.SetSubredditCombo)
 		self.subredditCombo.Bind(wx.EVT_COMBOBOX, self.SetSubredditCombo)
 		subredditBox.Add(self.subredditCombo)
 		subredditBox.Add(wx.StaticText(self, label=' subreddit'))
 		vbox.Add(subredditBox)
-		vbox.Add((-1, 25))
+		vbox.Add((-1, 15))
 
 		searchBox = wx.BoxSizer(wx.HORIZONTAL)
 		searchBox.Add((25, -1))
-		searchBox.Add(wx.StaticText(self, label='Containing search terms '))
+		searchBox.Add(wx.StaticText(self, label='containing search terms '))
 		self.searchText = wx.TextCtrl(self, value=self.app.settings['search'])
 		self.searchText.Bind(wx.EVT_TEXT, self.SetSearchText)
 		searchBox.Add(self.searchText)
 		vbox.Add(searchBox)
-		vbox.Add((-1, 25))
+		vbox.Add((-1, 15))
 
 		minVoteBox = wx.BoxSizer(wx.HORIZONTAL)
 		minVoteBox.Add((25, -1))
-		minVoteBox.Add(wx.StaticText(self, label='With at least '))
+		minVoteBox.Add(wx.StaticText(self, label='with at least '))
 		self.minVoteSpin = wx.SpinCtrl(self, value=str(self.app.settings['minVote']), min=0, max=10000)
 		self.minVoteSpin.Bind(wx.EVT_SPINCTRL, self.SetMinVoteSpin)
 		minVoteBox.Add(self.minVoteSpin)
 		minVoteBox.Add(wx.StaticText(self, label=' upvotes'))
 		vbox.Add(minVoteBox)
-		vbox.Add((-1, 25))
+		vbox.Add((-1, 15))
 
 		fromBox = wx.BoxSizer(wx.HORIZONTAL)
 		fromBox.Add((25, -1))
-		fromBox.Add(wx.StaticText(self, label='From the past '))
+		fromBox.Add(wx.StaticText(self, label='from the past '))
 		self.pastCombo = wx.ComboBox(self, choices=pasts, value=self.app.settings['past'], style=wx.CB_READONLY)
 		self.pastCombo.Bind(wx.EVT_TEXT, self.SetPastCombo)
 		self.pastCombo.Bind(wx.EVT_COMBOBOX, self.SetPastCombo)
 		fromBox.Add(self.pastCombo)
 		vbox.Add(fromBox)
-		vbox.Add((-1, 25))
+		vbox.Add((-1, 15))
+
+		intervalBox = wx.BoxSizer(wx.HORIZONTAL)
+		intervalBox.Add((25, -1))
+		intervalBox.Add(wx.StaticText(self, label='and update the wallpaper every '))
+		self.intervalSpin = wx.SpinCtrl(self, value=str(self.app.settings['interval']), min=1)
+		self.intervalSpin.Bind(wx.EVT_SPINCTRL, self.SetIntervalSpin)
+		intervalBox.Add(self.intervalSpin)
+		intervalBox.Add(wx.StaticText(self, label=' hours.'))
+		vbox.Add(intervalBox)
+		vbox.Add((-1, 15))
 
 		nsfwBox = wx.BoxSizer(wx.HORIZONTAL)
 		nsfwBox.Add((25, -1))
-		self.nsfwCheck = wx.CheckBox(self, label='Allow NSFW wallpapers?')
+		self.nsfwCheck = wx.CheckBox(self, label='Allowing NSFW wallpapers?')
 		self.nsfwCheck.SetValue(self.app.settings['allowNSFW'])
 		self.nsfwCheck.Bind(wx.EVT_CHECKBOX, self.SetNSFWCheck)
 		nsfwBox.Add(self.nsfwCheck)
 		vbox.Add(nsfwBox)
-		vbox.Add((-1, 25))
-
-		intervalBox = wx.BoxSizer(wx.HORIZONTAL)
-		intervalBox.Add((25, -1))
-		intervalBox.Add(wx.StaticText(self, label='Update the wallpaper every '))
-		self.intervalSpin = wx.SpinCtrl(self, value=str(self.app.settings['interval']), min=1)
-		self.intervalSpin.Bind(wx.EVT_SPINCTRL, self.SetIntervalSpin)
-		intervalBox.Add(self.intervalSpin)
-		intervalBox.Add(wx.StaticText(self, label=' hours'))
-		vbox.Add(intervalBox)
+		vbox.Add((-1, 15))
 
 		vbox.Add((-1, 10))
 		vbox.Add(wx.StaticLine(self), 0, wx.EXPAND)
@@ -129,6 +142,10 @@ class PreferencesDialog(wx.Dialog):
 		self.app.settings['subreddit'] = self.subredditCombo.GetValue()
 		self.app.OnFilterUpdate()
 
+	def SetSelectCombo(self, evt):
+		self.app.settings['select'] = self.selectCombo.GetValue()
+		self.app.OnFilterUpdate()
+
 	def OnClose(self, evt):
 		self.app.SaveSettings()
 		self.Destroy()
@@ -157,12 +174,14 @@ class ReddWallIcon(wx.TaskBarIcon):
 
 class ReddWall(wx.App):
 	SETTINGS_PATH = os.path.join(os.path.expanduser("~"), ".reddwall.json")
-	MIN_NUM = 10
+	MIN_NUM = 1
 	MAX_TRIES = 10
 	submissions = []
 	needSubmissionsUpdate = False
 	is_running = False
 	submission_ids = []
+	settings = default_settings
+	updatingSubmissions = False
 
 	def __init__(self):
 		wx.App.__init__(self)
@@ -194,6 +213,9 @@ class ReddWall(wx.App):
 		return submission.score > self.settings['minVote'] and (self.settings['allowNSFW'] or not submission.over_18) and not submission.id in self.submission_ids
 
 	def GetSubmissions(self):
+		if self.updatingSubmissions:
+			return
+		self.updatingSubmissions = True
 		subreddit = r.get_subreddit(self.settings['subreddit'])
 		pasts = {
 			'hour': subreddit.get_top_from_hour,
@@ -205,14 +227,21 @@ class ReddWall(wx.App):
 		}
 		self.submissions = []
 		num_submissions = self.MIN_NUM
+		limit = 100
+		if self.settings['select'] == 'random':
+			limit = 100
+		elif self.settings['select'] == 'top':
+			limit = 1
 		request = pasts[self.settings['past']](limit=100)
 		for submission in request:
 			if self.SubmissionOkay(submission):
 				self.submissions.append(submission)
 				self.submission_ids.append(submission.id)
 				num_submissions -= 1
-		random.shuffle(self.submissions)
+		if self.settings['select'] == 'random':
+			random.shuffle(self.submissions)
 		self.needSubmissionsUpdate = False
+		self.updatingSubmissions = False
 
 	def UntilValidImageUrl(self):
 		tries = self.MAX_TRIES
@@ -232,7 +261,7 @@ class ReddWall(wx.App):
 		if self.is_running:
 			return
 		self.is_running = True
-		if self.needSubmissionsUpdate:
+		if self.needSubmissionsUpdate or self.settings['select'] == 'top':
 			self.GetSubmissions()
 		wallpaper.set_wallpaper_request(self.UntilValidImageUrl())
 		self.is_running = False
@@ -261,9 +290,9 @@ class ReddWall(wx.App):
 		else:
 			try:
 				with open(self.SETTINGS_PATH, 'r') as infile:
-					self.settings = json.load(infile)
+					self.settings.extend(json.load(infile))
 			except:
-				self.settings = default_settings
+				pass
 
 	def Quit(self, evt=None):
 		self.ExitMainLoop()
