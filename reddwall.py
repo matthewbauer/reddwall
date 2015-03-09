@@ -157,7 +157,11 @@ class ReddWallIcon(wx.TaskBarIcon):
 
 	def __init__(self, parent):
 		wx.TaskBarIcon.__init__(self)
-		ICON_PATH = "alien.png"
+		if getattr(sys, 'frozen', False):
+			basedir = sys._MEIPASS
+		else:
+			basedir = os.path.dirname(__file__)
+		ICON_PATH = os.path.join(basedir, "alien.png")
 		self.SetIcon(wx.Icon(ICON_PATH, wx.BITMAP_TYPE_PNG), "alien")
 		self.Bind(wx.EVT_MENU, parent.NextWallpaper, id=self.ID_NEW_OPTION)
 		self.Bind(wx.EVT_MENU, parent.CreatePrefWindow, id=self.ID_PREF_OPTION)
@@ -276,6 +280,9 @@ class ReddWall(wx.App):
 
 	def OnFilterUpdate(self):
 		self.needSubmissionsUpdate = True
+
+	def OSXIsGUIApplication(self):
+		return False
 
 	def SaveSettings(self):
 		with open(self.SETTINGS_PATH, 'w') as outfile:

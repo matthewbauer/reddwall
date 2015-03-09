@@ -12,10 +12,11 @@ exe = EXE(pyz,
           a.datas,
           TOC([('praw/praw.ini', 'praw.ini', 'DATA'), ('alien.png', 'alien.png', 'DATA')]),
           name='reddwall',
-          debug=True,
-          strip=None,
+          debug=False,
+          strip=True,
           upx=True,
-          console=False )
+          console=False,
+          background=True )
 app = BUNDLE(exe,
              name='reddwall.app',
              icon=None)
