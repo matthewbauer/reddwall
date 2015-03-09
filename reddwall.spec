@@ -1,22 +1,21 @@
 # -*- mode: python -*-
 a = Analysis(['reddwall.py'],
-             pathex=['C:\\Users\\jbaue_000\\Documents\\GitHub\\reddwall'],
+             pathex=['/Users/matthew/Projects/reddwall'],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None)
-
-
-a.datas.append(('alien.png', 'alien.png', 'DATA'))
-a.datas.append(('praw\\praw.ini', 'praw.ini', 'DATA'))
-			 
 pyz = PYZ(a.pure)
 exe = EXE(pyz,
           a.scripts,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='reddwall.exe',
-          debug=False,
+          TOC([('praw/praw.ini', 'praw.ini', 'DATA'), ('alien.png', 'alien.png', 'DATA')]),
+          name='reddwall',
+          debug=True,
           strip=None,
           upx=True,
-          console=False)
+          console=False )
+app = BUNDLE(exe,
+             name='reddwall.app',
+             icon=None)

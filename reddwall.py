@@ -8,6 +8,7 @@ import wx
 import os.path
 import sys
 import json
+import signal
 
 r = praw.Reddit(user_agent='mac:org.bauer.reddwall:v1.0.0 (by /u/mjbauer95)')
 
@@ -183,6 +184,8 @@ class ReddWall(wx.App):
 	def __init__(self):
 		wx.App.__init__(self)
 
+		signal.signal(signal.SIGINT, self.Quit)
+
 		self.LoadSettings()
 		self.icon = ReddWallIcon(self)
 
@@ -202,9 +205,6 @@ class ReddWall(wx.App):
 	def Init(self):
 		self.GetSubmissions()
 		self.NextWallpaper()
-
-	def OSXIsGUIApplication(self):
-		return False
 
 	def SubmissionOkay(self, submission):
 		return submission.score > self.settings['minVote'] and (self.settings['allowNSFW'] or not submission.over_18) and not submission.id in self.submission_ids
@@ -264,8 +264,8 @@ class ReddWall(wx.App):
 		self.is_running = False
 
 	def CreatePrefWindow(self, evt=None):
-		pref = PreferencesDialog(self)
-		pref.Show()
+		self.preferences = PreferencesDialog(self)
+		self.preferences.Show()
 
 	def StartTimer(self):
 		self.timer.Start(self.settings['interval'] * 60 * 60 * 1000)
@@ -288,7 +288,9 @@ class ReddWall(wx.App):
 		except:
 			pass
 
-	def Quit(self, evt=None):
+	def Quit(self, evt=None, frame=None):
+		self.SaveSettings()
 		self.ExitMainLoop()
+		sys.exit(0)
 
 ReddWall()
