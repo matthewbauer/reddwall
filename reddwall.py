@@ -11,18 +11,18 @@ import json
 
 r = praw.Reddit(user_agent='mac:org.bauer.reddwall:v1.0.0 (by /u/mjbauer95)')
 
-pasts = ['hour', 'week', 'day', 'month', 'year', 'all']
+pasts = ['hour', 'day', 'week', 'month', 'year', 'all']
 suggested_subreddits = ['wallpapers', 'wallpaper', 'EarthPorn', 'BackgroundArt', 'TripleScreenPlus', 'quotepaper', 'BigWallpapers', 'MultiWall', 'DesktopLego', 'VideoGameWallpapers']
 select = ['random', 'top']
 
 default_settings = dict(
-	interval = 1,
-	minVote = 5,
+	interval = 24,
+	minVote = 0,
 	subreddit = 'wallpapers',
 	search = '',
-	past = 'year',
+	past = 'day',
 	allowNSFW = False,
-	select = 'random'
+	select = 'top'
 )
 
 class PreferencesDialog(wx.Dialog):
@@ -156,10 +156,7 @@ class ReddWallIcon(wx.TaskBarIcon):
 
 	def __init__(self, parent):
 		wx.TaskBarIcon.__init__(self)
-		if getattr(sys, 'frozen', False):
-			ICON_PATH = os.path.join(sys._MEIPASS, "alien.png")
-		else:
-			ICON_PATH = "alien.png"
+		ICON_PATH = "alien.png"
 		self.SetIcon(wx.Icon(ICON_PATH, wx.BITMAP_TYPE_PNG), "alien")
 		self.Bind(wx.EVT_MENU, parent.NextWallpaper, id=self.ID_NEW_OPTION)
 		self.Bind(wx.EVT_MENU, parent.CreatePrefWindow, id=self.ID_PREF_OPTION)
@@ -232,11 +229,11 @@ class ReddWall(wx.App):
 			limit = 100
 		elif self.settings['select'] == 'top':
 			limit = 1
-		request = pasts[self.settings['past']](limit=100)
+		request = pasts[self.settings['past']](limit=limit)
 		for submission in request:
 			if self.SubmissionOkay(submission):
 				self.submissions.append(submission)
-				self.submission_ids.append(submission.id)
+				#self.submission_ids.append(submission.id)
 				num_submissions -= 1
 		if self.settings['select'] == 'random':
 			random.shuffle(self.submissions)
@@ -285,14 +282,11 @@ class ReddWall(wx.App):
 		    json.dump(self.settings, outfile)
 
 	def LoadSettings(self):
-		if not os.path.exists(self.SETTINGS_PATH):
-			self.settings = default_settings
-		else:
-			try:
-				with open(self.SETTINGS_PATH, 'r') as infile:
-					self.settings.extend(json.load(infile))
-			except:
-				pass
+		try:
+			with open(self.SETTINGS_PATH, 'r') as infile:
+				self.settings.update(json.load(infile))
+		except:
+			pass
 
 	def Quit(self, evt=None):
 		self.ExitMainLoop()

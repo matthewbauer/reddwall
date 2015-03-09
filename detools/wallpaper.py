@@ -119,8 +119,8 @@ def set_wallpaper(filename):
 		raise WallpaperSetterError(wallpaper_setter.environment)
 
 def set_wallpaper_request(request):
-	#i, path = tempfile.mkstemp(suffix=".jpg", dir=os.getcwd())
-	path = os.path.join(os.getcwd(), "background.jpg")
+	i, path = tempfile.mkstemp()
+	#path = os.path.join(os.getcwd(), "background.jpg")
 	with open(path, 'wb') as fo:
 		for chunk in request.iter_content(4096):
 			fo.write(chunk)
