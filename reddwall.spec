@@ -1,9 +1,10 @@
 # -*- mode: python -*-
+
+block_cipher = None
+
+
 a = Analysis(['reddwall.py'],
-             pathex=['/Users/matthew/Projects/reddwall'],
-             hiddenimports=[],
-             hookspath=None,
-             runtime_hooks=None)
+             pathex=['/Users/matthew/Projects/reddwall'])
 pyz = PYZ(a.pure)
 exe = EXE(pyz,
           a.scripts,
@@ -15,8 +16,8 @@ exe = EXE(pyz,
           debug=False,
           strip=True,
           upx=True,
-          console=False,
-          background=True )
+          background=True,
+          console=False )
 app = BUNDLE(exe,
              name='reddwall.app',
-             icon=None)
+             bundle_identifier='reddwall')

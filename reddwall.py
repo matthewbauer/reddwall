@@ -8,7 +8,6 @@ import wx
 import os.path
 import sys
 import json
-import signal
 
 r = praw.Reddit(user_agent='mac:org.bauer.reddwall:v1.0.0 (by /u/mjbauer95)')
 
@@ -188,8 +187,6 @@ class ReddWall(wx.App):
 	def __init__(self):
 		wx.App.__init__(self)
 
-		signal.signal(signal.SIGINT, self.Quit)
-
 		self.LoadSettings()
 		self.icon = ReddWallIcon(self)
 
@@ -298,6 +295,5 @@ class ReddWall(wx.App):
 	def Quit(self, evt=None, frame=None):
 		self.SaveSettings()
 		self.ExitMainLoop()
-		sys.exit(0)
 
 ReddWall()
