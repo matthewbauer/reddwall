@@ -9,5 +9,6 @@ setup(name='ReddWall',
       author='Matthew Bauer',
       author_email='mjbauer95@gmail.com',
       url='http://github.com/matthewbauer/reddwall',
+      setup_requires=['pyinstaller'],
       install_requires=['requests', 'beautifulsoup4', 'praw', 'wxpython']
 )

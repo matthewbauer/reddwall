@@ -211,8 +211,8 @@ class ReddWall(wx.App):
 		return submission.score > self.settings['minVote'] and (self.settings['allowNSFW'] or not submission.over_18) and not submission.id in self.submission_ids
 
 	def GetSubmissions(self):
-		if self.updatingSubmissions:
-			return
+		#if self.updatingSubmissions:
+		#	return
 		self.updatingSubmissions = True
 		subreddit = r.get_subreddit(self.settings['subreddit'])
 		pasts = {
@@ -256,8 +256,8 @@ class ReddWall(wx.App):
 				continue
 
 	def NextWallpaper(self, evt=None):
-		if self.is_running:
-			return
+		#if self.is_running:
+		#	return
 		self.is_running = True
 		if self.needSubmissionsUpdate or self.settings['select'] == 'top':
 			self.GetSubmissions()
@@ -267,6 +267,8 @@ class ReddWall(wx.App):
 	def CreatePrefWindow(self, evt=None):
 		self.preferences = PreferencesDialog(self)
 		self.preferences.Show()
+		self.preferences.Raise()
+		self.preferences.Iconize(False)
 
 	def StartTimer(self):
 		self.timer.Start(self.settings['interval'] * 60 * 60 * 1000)

@@ -1,10 +1,6 @@
 # -*- mode: python -*-
-
 block_cipher = None
-
-
-a = Analysis(['reddwall.py'],
-             pathex=['/Users/matthew/Projects/reddwall'])
+a = Analysis(['reddwall.py'])
 pyz = PYZ(a.pure)
 exe = EXE(pyz,
           a.scripts,
@@ -20,4 +16,4 @@ exe = EXE(pyz,
           console=False )
 app = BUNDLE(exe,
              name='reddwall.app',
-             bundle_identifier='reddwall')
+             bundle_identifier='com.bauer.reddwall')
