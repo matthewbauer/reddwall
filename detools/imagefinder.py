@@ -21,12 +21,15 @@ def get_image_links(soup):
 	links.extend(soup.select('.post a img')) # imgur
 	return links
 
-def get_image_request(url, follow=True):
+def get_image_request(url, follow=True, max_recurse=5):
+	if max_recurse == 0:
+		return
+	max_recurse -= 1
 	url = urlparse.urlparse(url, 'http')
 	r = requests.get(url.geturl())
 	content_type = r.headers['content-type'].split(';')[0]
 	if follow and 'location' in r.headers:
-		return get_image_request(r.headers['location'], False)
+		return get_image_request(r.headers['location'], False, max_recurse)
 	if follow and content_type == 'text/html':
 		soup = BeautifulSoup(r.text)
 		links = get_image_links(soup)
@@ -40,7 +43,7 @@ def get_image_request(url, follow=True):
 			link_url = link['src']
 		if link_url is None:
 			raise NoImageFound(url.geturl())
-		return get_image_request(link_url, False)
+		return get_image_request(link_url, False, max_recurse)
 	if not content_type.startswith('image/'):
 		raise NoImageFound(url.geturl())
 	return r
