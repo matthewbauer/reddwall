@@ -10,7 +10,7 @@ On the first run, ReddWall will find a random wallpaper from /r/wallpapers and m
 
 Downloads
 ---------
-* Windows: [reddwall-v0.2.exe](https://github.com/matthewbauer/reddwall/releases/download/0.2/reddwall.exe)
+* Windows: [reddwall-v0.3.exe](https://github.com/matthewbauer/reddwall/releases/download/0.3/reddwall.exe)
 * Mac OS X: [reddwall-v0.2.app](https://github.com/matthewbauer/reddwall/releases/download/0.2/reddwall.app.zip)
 * Linux: [reddwall-v0.2.tar.gz](https://github.com/matthewbauer/reddwall/archive/0.2.tar.gz) (source code)
 
