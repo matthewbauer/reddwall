@@ -30,10 +30,13 @@ except ImportError:
 
 try:
 	import ctypes
+	import win32con
+	import shutil
 	class WindowsWallpaperSetter(WallpaperSetter):
-                SPI_SETDESKWALLPAPER = 20
 		def set_wallpaper(self, filename):
-			ctypes.windll.user32.SystemParametersInfoA(self.SPI_SETDESKWALLPAPER, 0, filename, 0)
+			saveFile = '%s\\Microsoft\\Windows\\Themes\\%s.jpg' % (os.getenv('APPDATA'), filename.split('\\')[-1])
+			shutil.copy(filename, saveFile)
+			ctypes.windll.user32.SystemParametersInfoA(win32con.SPI_SETDESKWALLPAPER, 0, saveFile, 3)
 	wallpaper_setters['windows'] = WindowsWallpaperSetter
 except ImportError:
 	pass
@@ -110,6 +113,7 @@ class WallpaperSetterError(Exception):
 
 def set_wallpaper(filename):
 	wallpaper_setter = get_wallpaper_setter()
+	i, path = tempfile.mkstemp()
 	if wallpaper_setter is not None:
 		try:
 			wallpaper_setter.set_wallpaper(filename)
@@ -120,10 +124,7 @@ def set_wallpaper(filename):
 
 def set_wallpaper_request(request):
 	environment = de.get_desktop_environment()
-	if environment == 'windows':
-		path = os.path.join(os.getcwd(), 'background.jpg')
-	else:
-		i, path = tempfile.mkstemp()
+	i, path = tempfile.mkstemp()
 	with open(path, 'wb') as fo:
 		for chunk in request.iter_content(4096):
 			fo.write(chunk)
