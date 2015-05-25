@@ -6,3 +6,4 @@ build
 *.egg-info
 *.jpg
 *.cfg
+*.db
